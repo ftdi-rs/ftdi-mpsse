@@ -1,6 +1,7 @@
 #![deny(unsafe_code)]
 
 use std::convert::From;
+use std::result::Result;
 use std::time::Duration;
 
 /// MPSSE opcodes.
@@ -345,6 +346,27 @@ impl std::default::Default for MpsseSettings {
             mask: 0x00,
             clock_frequency: None,
         }
+    }
+}
+
+/// FTDI MPSSE configurator and executor
+pub trait MpsseCmdExecutor {
+    /// Error type
+    type Error;
+
+    /// Configure FTDI MPSSE mode
+    fn init(&mut self, settings: &MpsseSettings) -> Result<(), Self::Error>;
+
+    /// Execute MPSSE write command sequence
+    fn send(&mut self, data: &[u8]) -> Result<(), Self::Error>;
+
+    /// Execute MPSSE read command sequence
+    fn recv(&mut self, data: &mut [u8]) -> Result<(), Self::Error>;
+
+    /// Execute MPSSE command and read response
+    fn xfer(&mut self, txdata: &[u8], rxdata: &mut [u8]) -> Result<(), Self::Error> {
+        self.send(txdata)?;
+        self.recv(rxdata)
     }
 }
 
