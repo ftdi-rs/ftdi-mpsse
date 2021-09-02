@@ -329,9 +329,7 @@ pub struct MpsseSettings {
     pub mask: u8,
     /// Clock frequency.
     ///
-    /// If not `None` this will call [`set_clock`] to set the clock frequency.
-    ///
-    /// [`set_clock`]: crate::FtdiMpsse::set_clock
+    /// If `None`, then no frequency changes will be applied.
     pub clock_frequency: Option<u32>,
 }
 
@@ -435,6 +433,32 @@ impl MpsseCmdBuilder {
     /// ```
     pub fn as_slice(&self) -> &[u8] {
         self.0.as_slice()
+    }
+
+    /// Set the MPSSE clock frequency using provided
+    /// divisor value and clock divider configuration.
+    /// Both parameters are device dependent.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use ftdi_mpsse::MpsseCmdBuilder;
+    ///
+    /// let cmd = MpsseCmdBuilder::new().set_clock(9, Some(false));
+    ///
+    /// ```
+    pub fn set_clock(mut self, divisor: u32, clkdiv: Option<bool>) -> Self {
+        match clkdiv {
+            Some(true) => self.0.push(MpsseCmd::EnableClockDivide.into()),
+            Some(false) => self.0.push(MpsseCmd::DisableClockDivide.into()),
+            None => {}
+        };
+
+        self.0.push(MpsseCmd::SetClockFrequency.into());
+        self.0.push((divisor & 0xFF) as u8);
+        self.0.push(((divisor >> 8) & 0xFF) as u8);
+
+        self
     }
 
     /// Enable the MPSSE loopback state.
