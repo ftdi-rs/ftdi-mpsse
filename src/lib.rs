@@ -281,51 +281,26 @@ impl From<MpsseCmd> for u8 {
 
 /// Initialization settings for the MPSSE.
 ///
-/// Used by [`initialize_mpsse`].
+/// Settings can be written to the device with the appropriate
+/// implementation of [`mpsse_init`] method.
 ///
-/// [`initialize_mpsse`]: FtdiMpsse::initialize_mpsse
+/// [`mpsse_init`]: MpsseCmdExecutor::mpsse_init
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct MpsseSettings {
     /// Reset the MPSSE on initialization.
-    ///
-    /// This calls [`reset`] if `true`.
-    ///
-    /// [`reset`]: FtdiCommon::reset
     pub reset: bool,
     /// USB in transfer size in bytes.
-    ///
-    /// This gets passed to [`set_usb_parameters`].
-    ///
-    /// [`set_usb_parameters`]: FtdiCommon::set_usb_parameters
     pub in_transfer_size: u32,
     /// Read timeout.
-    ///
-    /// This gets passed along with [`write_timeout`] to [`set_timeouts`].
-    ///
-    /// [`set_timeouts`]: FtdiCommon::set_timeouts
-    /// [`write_timeout`]: MpsseSettings::write_timeout
     pub read_timeout: Duration,
     /// Write timeout.
-    ///
-    /// This gets passed along with [`read_timeout`] to [`set_timeouts`].
-    ///
-    /// [`set_timeouts`]: FtdiCommon::set_timeouts
-    /// [`read_timeout`]: MpsseSettings::read_timeout
     pub write_timeout: Duration,
     /// Latency timer.
-    ///
-    /// This gets passed to [`set_latency_timer`].
-    ///
-    /// [`set_latency_timer`]: FtdiCommon::set_latency_timer
     pub latency_timer: Duration,
     /// Bitmode mask.
     ///
     /// * A bit value of `0` sets the corresponding pin to an input.
     /// * A bit value of `1` sets the corresponding pin to an output.
-    ///
-    /// This gets passed to [`set_bit_mode`].
-    ///
-    /// [`set_bit_mode`]: FtdiCommon::set_bit_mode
     pub mask: u8,
     /// Clock frequency.
     ///
@@ -373,19 +348,19 @@ pub trait MpsseCmdExecutor {
 /// For details about the MPSSE read the [FTDI MPSSE Basics].
 ///
 /// This structure is a `Vec<u8>` that the methods push bytewise commands onto.
-/// These commands can then be written to the device with the [`write_all`]
-/// method.
+/// These commands can then be written to the device with the appropriate
+/// implementations of [`mpsse_send`] and [`mpsse_xfer`] methods.
 ///
 /// This is useful for creating commands that need to do multiple operations
-/// quickly, since individual [`write_all`] calls can be expensive.
-/// For example, this can be used to set a GPIO low and clock data out for
-/// SPI operations.
+/// quickly, since individual write calls can be expensive. For example,
+/// this can be used to set a GPIO low and clock data out for SPI operations.
 ///
 /// If dynamic command layout is not required, the [`mpsse`] macro can build
 /// command `[u8; N]` arrays at compile-time.
 ///
 /// [FTDI MPSSE Basics]: https://www.ftdichip.com/Support/Documents/AppNotes/AN_135_MPSSE_Basics.pdf
-/// [`write_all`]: FtdiCommon::write_all
+/// [`mpsse_send`]: MpsseCmdExecutor::mpsse_send
+/// [`mpsse_xfer`]: MpsseCmdExecutor::mpsse_xfer
 pub struct MpsseCmdBuilder(pub Vec<u8>);
 
 impl MpsseCmdBuilder {
@@ -697,7 +672,7 @@ impl MpsseCmdBuilder {
     /// # Ok::<(), std::boxed::Box<dyn std::error::Error>>(())
     /// ```
     ///
-    /// [`set_gpio_upper`]: FtdiMpsse::set_gpio_upper
+    /// [`set_gpio_upper`]: MpsseCmdBuilder::set_gpio_upper
     pub fn gpio_upper(mut self) -> Self {
         self.0.push(MpsseCmd::GetDataBitsHighbyte.into());
         self
