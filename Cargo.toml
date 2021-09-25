@@ -1,7 +1,7 @@
 [package]
 name = "ftdi-mpsse"
 version = "0.1.0"
-authors = ["Sergey Matyukevich <geomatsi@gmail.com>"]
+authors = ["Alex Martens <alexmgit@protonmail.com>", "Sergey Matyukevich <geomatsi@gmail.com>"]
 edition = "2018"
 description = "Rust helpers for MPSSE engine on FTDI chips."
 keywords = ["ftdi", "mpsse"]
