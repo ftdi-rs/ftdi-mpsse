@@ -1,3 +1,5 @@
+//! Multi-protocol synchronous serial engine utilities for FTDI devices.
+#![doc(html_root_url = "https://docs.rs/ftdi-mpsse/0.1.0")]
 #![deny(unsafe_code)]
 
 use std::convert::From;
@@ -282,9 +284,9 @@ impl From<MpsseCmd> for u8 {
 /// Initialization settings for the MPSSE.
 ///
 /// Settings can be written to the device with the appropriate
-/// implementation of [`mpsse_init`] method.
+/// implementation of [`init`] method.
 ///
-/// [`mpsse_init`]: MpsseCmdExecutor::mpsse_init
+/// [`init`]: MpsseCmdExecutor::init
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct MpsseSettings {
     /// Reset the MPSSE on initialization.
@@ -349,7 +351,7 @@ pub trait MpsseCmdExecutor {
 ///
 /// This structure is a `Vec<u8>` that the methods push bytewise commands onto.
 /// These commands can then be written to the device with the appropriate
-/// implementations of [`mpsse_send`] and [`mpsse_xfer`] methods.
+/// implementations of [`send`] and [`xfer`] methods.
 ///
 /// This is useful for creating commands that need to do multiple operations
 /// quickly, since individual write calls can be expensive. For example,
@@ -359,8 +361,8 @@ pub trait MpsseCmdExecutor {
 /// command `[u8; N]` arrays at compile-time.
 ///
 /// [FTDI MPSSE Basics]: https://www.ftdichip.com/Support/Documents/AppNotes/AN_135_MPSSE_Basics.pdf
-/// [`mpsse_send`]: MpsseCmdExecutor::mpsse_send
-/// [`mpsse_xfer`]: MpsseCmdExecutor::mpsse_xfer
+/// [`send`]: MpsseCmdExecutor::send
+/// [`xfer`]: MpsseCmdExecutor::xfer
 pub struct MpsseCmdBuilder(pub Vec<u8>);
 
 impl MpsseCmdBuilder {
@@ -754,7 +756,7 @@ impl MpsseCmdBuilder {
         len -= 1;
         self.0
             .extend_from_slice(&[mode.into(), (len & 0xFF) as u8, ((len >> 8) & 0xFF) as u8]);
-        self.0.extend_from_slice(&data);
+        self.0.extend_from_slice(data);
         self
     }
 
@@ -791,7 +793,7 @@ impl MpsseCmdBuilder {
         len -= 1;
         self.0
             .extend_from_slice(&[mode.into(), (len & 0xFF) as u8, ((len >> 8) & 0xFF) as u8]);
-        self.0.extend_from_slice(&data);
+        self.0.extend_from_slice(data);
         self
     }
 
