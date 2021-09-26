@@ -212,7 +212,7 @@ pub enum ClockBitsIn {
     LsbPos = 0x2A,
     /// Negative clock edge LSB first.
     ///
-    /// The data will be shifted down so that thefirst bit in may not be in bit
+    /// The data will be shifted down so that the first bit in may not be in bit
     /// 0 but from 1 upwards depending on the number of bits to shift
     /// (i.e. a length of 1 bit will have the data bit sampled in bit 7 of the
     /// byte sent back to the PC).
@@ -480,7 +480,7 @@ impl MpsseCmdBuilder {
 
     /// Disable 3 phase data clocking.
     ///
-    /// This is only avaliable on FTx232H devices.
+    /// This is only available on FTx232H devices.
     ///
     /// This will give a 2 stage data shift which is the default state.
     ///
@@ -509,7 +509,7 @@ impl MpsseCmdBuilder {
 
     /// Enable 3 phase data clocking.
     ///
-    /// This is only avaliable on FTx232H devices.
+    /// This is only available on FTx232H devices.
     ///
     /// This will give a 3 stage data shift for the purposes of supporting
     /// interfaces such as I2C which need the data to be valid on both edges of
@@ -906,7 +906,7 @@ impl MpsseCmdBuilder {
 ///
 /// `clock_data` and `clock_data_out` require that the second argument is a fixed-length, square
 /// bracketed list of `u8` values. Compile-time limitations make arbitrary array concatenation or
-/// coersion infeasible.
+/// coercion infeasible.
 ///
 /// # Asserts
 ///
@@ -924,7 +924,7 @@ impl MpsseCmdBuilder {
 /// Comments within the implementation of this macro contain hints on how to implement these rules.
 ///
 /// For example, a SPI device typically delineates transfers with the CS line. Fundamental
-/// commands like `cs_high` and `cs_low` can be implmented this way, along with other
+/// commands like `cs_high` and `cs_low` can be implemented this way, along with other
 /// device-specific abstractions.
 ///
 /// ```
