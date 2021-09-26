@@ -1,11 +1,15 @@
 [package]
 name = "ftdi-mpsse"
-version = "0.1.0"
+version = "0.1.0" # remember to update html_root_url
 authors = ["Alex Martens <alexmgit@protonmail.com>", "Sergey Matyukevich <geomatsi@gmail.com>"]
 edition = "2018"
-description = "Rust helpers for MPSSE engine on FTDI chips."
+description = "Rust helpers for the MPSSE on FTDI chips."
 keywords = ["ftdi", "mpsse"]
+categories = ["hardware-support"]
+readme = "README.md"
 license = "MIT"
+repository = "https://github.com/ftdi-rs/ftdi-mpsse"
+documentation = "https://docs.rs/ftdi-mpsse"
 
 [dependencies]
 static_assertions = "^1.1.0"
