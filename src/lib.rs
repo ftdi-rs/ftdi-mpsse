@@ -902,7 +902,13 @@ impl MpsseCmdBuilder {
     /// * `tdi` - Value to place on TDI while clocking.
     /// * `len` - Number of bits to clock out.
     ///           This will panic for values greater than 7.
-    pub fn clock_tms_out(mut self, mode: ClockTMSOut, mut data: u8, tdi: bool, mut len: u8) -> Self {
+    pub fn clock_tms_out(
+        mut self,
+        mode: ClockTMSOut,
+        mut data: u8,
+        tdi: bool,
+        mut len: u8,
+    ) -> Self {
         assert!(len <= 7, "data length cannot exceed 7");
         if len == 0 {
             return self;
