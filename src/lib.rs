@@ -282,6 +282,10 @@ impl From<MpsseCmd> for u8 {
 }
 
 /// Modes for clocking bits out on TMS for JTAG mode.
+///
+/// This is an argument to the [`clock_tms_out`] method.
+///
+/// [`clock_tms_out`]: MpsseCmdBuilder::clock_tms_out
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum ClockTMSOut {
@@ -298,6 +302,10 @@ impl From<ClockTMSOut> for u8 {
 }
 
 /// Modes for clocking bits out on TMS for JTAG mode while reading TDO.
+///
+/// This is an argument to the [`clock_tms`] method.
+///
+/// [`clock_tms`]: MpsseCmdBuilder::clock_tms
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum ClockTMS {
@@ -881,6 +889,50 @@ impl MpsseCmdBuilder {
             return self;
         }
         len -= 1;
+        self.0.extend_from_slice(&[mode.into(), len, data]);
+        self
+    }
+
+    /// Clock TMS bits out.
+    ///
+    /// # Arguments
+    ///
+    /// * `mode` - TMS clocking mode.
+    /// * `data` - TMS bits.
+    /// * `tdi` - Value to place on TDI while clocking.
+    /// * `len` - Number of bits to clock out.
+    ///           This will panic for values greater than 7.
+    pub fn clock_tms_out(mut self, mode: ClockTMSOut, mut data: u8, tdi: bool, mut len: u8) -> Self {
+        assert!(len <= 7, "data length cannot exceed 7");
+        if len == 0 {
+            return self;
+        }
+        len -= 1;
+        if tdi {
+            data |= 0x80;
+        }
+        self.0.extend_from_slice(&[mode.into(), len, data]);
+        self
+    }
+
+    /// Clock TMS bits out while clocking TDO bits in.
+    ///
+    /// # Arguments
+    ///
+    /// * `mode` - TMS clocking mode.
+    /// * `data` - TMS bits.
+    /// * `tdi` - Value to place on TDI while clocking.
+    /// * `len` - Number of bits to clock out.
+    ///           This will panic for values greater than 7.
+    pub fn clock_tms(mut self, mode: ClockTMS, mut data: u8, tdi: bool, mut len: u8) -> Self {
+        assert!(len <= 7, "data length cannot exceed 7");
+        if len == 0 {
+            return self;
+        }
+        len -= 1;
+        if tdi {
+            data |= 0x80;
+        }
         self.0.extend_from_slice(&[mode.into(), len, data]);
         self
     }
