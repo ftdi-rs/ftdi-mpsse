@@ -26,9 +26,11 @@ fn all_commands() {
             clock_bits_out(ClockBitsOut::MsbPos, val42, 8);
             const BITS_IN_INDEX = clock_bits_in(ClockBitsIn::MsbPos, 8);
             const BITS_INDEX = clock_bits(ClockBits::MsbPosIn, val42, 8);
+            clock_tms_out(ClockTMSOut::NegEdge, val42, true, 7);
+            const TMS_INDEX = clock_tms(ClockTMS::NegTMSPosTDO, val42, false, 7);
         };
     }
-    assert_eq!(data.len(), 40);
+    assert_eq!(data.len(), 46);
     assert_eq!(
         data,
         [
@@ -72,15 +74,22 @@ fn all_commands() {
             ClockBits::MsbPosIn as u8,
             7 as u8,
             42 as u8,
+            ClockTMSOut::NegEdge as u8,
+            6 as u8,
+            (42 | 0x80) as u8,
+            ClockTMS::NegTMSPosTDO as u8,
+            6 as u8,
+            42 as u8,
         ]
     );
-    assert_eq!(DATA_READ_LEN, 12);
+    assert_eq!(DATA_READ_LEN, 13);
     assert_eq!(LOWER_INDEX, 0);
     assert_eq!(UPPER_INDEX, 1);
     assert_eq!(DATA_IN_RANGE, 2..6);
     assert_eq!(DATA_RANGE, 6..10);
     assert_eq!(BITS_IN_INDEX, 10);
     assert_eq!(BITS_INDEX, 11);
+    assert_eq!(TMS_INDEX, 12);
 }
 
 #[test]
@@ -104,9 +113,11 @@ fn all_commands_const() {
             clock_bits_out(ClockBitsOut::MsbPos, 42, 8);
             const BITS_IN_INDEX = clock_bits_in(ClockBitsIn::MsbPos, 8);
             const BITS_INDEX = clock_bits(ClockBits::MsbPosIn, 42, 8);
+            clock_tms_out(ClockTMSOut::NegEdge, 42, true, 7);
+            const TMS_INDEX = clock_tms(ClockTMS::NegTMSPosTDO, 42, false, 7);
         };
     }
-    assert_eq!(DATA.len(), 40);
+    assert_eq!(DATA.len(), 46);
     assert_eq!(
         DATA,
         [
@@ -150,15 +161,22 @@ fn all_commands_const() {
             ClockBits::MsbPosIn as u8,
             7 as u8,
             42 as u8,
+            ClockTMSOut::NegEdge as u8,
+            6 as u8,
+            (42 | 0x80) as u8,
+            ClockTMS::NegTMSPosTDO as u8,
+            6 as u8,
+            42 as u8,
         ]
     );
-    assert_eq!(DATA_READ_LEN, 12);
+    assert_eq!(DATA_READ_LEN, 13);
     assert_eq!(LOWER_INDEX, 0);
     assert_eq!(UPPER_INDEX, 1);
     assert_eq!(DATA_IN_RANGE, 2..6);
     assert_eq!(DATA_RANGE, 6..10);
     assert_eq!(BITS_IN_INDEX, 10);
     assert_eq!(BITS_INDEX, 11);
+    assert_eq!(TMS_INDEX, 12);
 }
 
 #[test]
@@ -237,6 +255,46 @@ fn clock_bits_assert_upper() {
     mpsse! {
         let (_data, DATA_READ_LEN) = {
             clock_bits(ClockBits::MsbPosIn, 42, 9);
+        };
+    }
+}
+
+#[test]
+#[should_panic(expected = "data length must be in 1..=7")]
+fn clock_tms_out_assert_lower() {
+    mpsse! {
+        let (_data, DATA_READ_LEN) = {
+            clock_tms_out(ClockTMSOut::NegEdge, 42, false, 0);
+        };
+    }
+}
+
+#[test]
+#[should_panic(expected = "data length must be in 1..=7")]
+fn clock_tms_out_assert_upper() {
+    mpsse! {
+        let (_data, DATA_READ_LEN) = {
+            clock_tms_out(ClockTMSOut::NegEdge, 42, false, 8);
+        };
+    }
+}
+
+#[test]
+#[should_panic(expected = "data length must be in 1..=7")]
+fn clock_tms_assert_lower() {
+    mpsse! {
+        let (_data, DATA_READ_LEN) = {
+            clock_tms(ClockTMS::NegTMSPosTDO, 42, false, 0);
+        };
+    }
+}
+
+#[test]
+#[should_panic(expected = "data length must be in 1..=7")]
+fn clock_tms_assert_upper() {
+    mpsse! {
+        let (_data, DATA_READ_LEN) = {
+            clock_tms(ClockTMS::NegTMSPosTDO, 42, false, 8);
         };
     }
 }

@@ -978,6 +978,8 @@ impl MpsseCmdBuilder {
 /// * [`clock_bits_out(mode: ClockBitsOut, data: u8, len: u8)`][`MpsseCmdBuilder::clock_bits_out`]
 /// * [`clock_bits_in(mode: ClockBitsIn, len: u8) -> usize`][`MpsseCmdBuilder::clock_bits_in`]
 /// * [`clock_bits(mode: ClockBits, data: u8, len: u8) -> usize`][`MpsseCmdBuilder::clock_bits`]
+/// * [`clock_tms_out(mode: ClockTMSOut, data: u8, tdi: bool, len: u8)`][`MpsseCmdBuilder::clock_tms_out`]
+/// * [`clock_tms(mode: ClockTMS, data: u8, tdi: bool, len: u8) -> usize`][`MpsseCmdBuilder::clock_tms`]
 ///
 /// Command pseudo-statements that read data from the device may optionally have the form:
 /// ```
@@ -1241,6 +1243,18 @@ macro_rules! mpsse {
     (($passthru:tt, $read_len:tt) {const $idx_id:ident = clock_bits($mode:expr, $data:expr, $len:expr); $($tail:tt)*} -> [$($out:tt)*]) => {
         const $idx_id: usize = $read_len;
         mpsse!(($passthru, $read_len) {clock_bits($mode, $data, $len); $($tail)*} -> [$($out)*]);
+    };
+    ($passthru:tt {clock_tms_out($mode:expr, $data:expr, $tdi:expr, $len:expr); $($tail:tt)*} -> [$($out:tt)*]) => {
+        mpsse!(@assert $passthru, ($len as u8 > 0_u8 && $len as u8 <= 7_u8), "data length must be in 1..=7");
+        mpsse!($passthru {$($tail)*} -> [$($out)* $mode as $crate::ClockTMSOut as u8, (($len) - 1) as u8, ($data as u8) | if $tdi { 0x80 } else { 0 },]);
+    };
+    (($passthru:tt, $read_len:tt) {clock_tms($mode:expr, $data:expr, $tdi:expr, $len:expr); $($tail:tt)*} -> [$($out:tt)*]) => {
+        mpsse!(@assert ($passthru, $read_len), ($len as u8 > 0_u8 && $len as u8 <= 7_u8), "data length must be in 1..=7");
+        mpsse!(($passthru, ($read_len + 1)) {$($tail)*} -> [$($out)* $mode as $crate::ClockTMS as u8, (($len) - 1) as u8, ($data as u8) | if $tdi { 0x80 } else { 0 },]);
+    };
+    (($passthru:tt, $read_len:tt) {const $idx_id:ident = clock_tms($mode:expr, $data:expr, $tdi:expr, $len:expr); $($tail:tt)*} -> [$($out:tt)*]) => {
+        const $idx_id: usize = $read_len;
+        mpsse!(($passthru, $read_len) {clock_tms($mode, $data, $tdi, $len); $($tail)*} -> [$($out)*]);
     };
 
     // Emit command_data
