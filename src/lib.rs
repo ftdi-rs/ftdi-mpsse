@@ -281,6 +281,42 @@ impl From<MpsseCmd> for u8 {
     }
 }
 
+/// Modes for clocking bits out on TMS for JTAG mode.
+#[repr(u8)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum ClockTMSOut {
+    /// LSB first, TMS out on positive edge
+    PosEdge = 0x4A,
+    /// LSB first, TMS out on negative edge
+    NegEdge = 0x4B,
+}
+
+impl From<ClockTMSOut> for u8 {
+    fn from(value: ClockTMSOut) -> u8 {
+        value as u8
+    }
+}
+
+/// Modes for clocking bits out on TMS for JTAG mode while reading TDO.
+#[repr(u8)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum ClockTMS {
+    /// LSB first, TMS out on positive edge, TDO in on positive edge.
+    PosTMSPosTDO = 0x6A,
+    /// LSB first, TMS out on positive edge, TDO in on negative edge.
+    PosTMSNegTDO = 0x6E,
+    /// LSB first, TMS out on negative edge, TDO in on positive edge.
+    NegTMSPosTDO = 0x6B,
+    /// LSB first, TMS out on negative edge, TDO in on negative edge.
+    NegTMSNegTDO = 0x6F,
+}
+
+impl From<ClockTMS> for u8 {
+    fn from(value: ClockTMS) -> u8 {
+        value as u8
+    }
+}
+
 /// Initialization settings for the MPSSE.
 ///
 /// Settings can be written to the device with the appropriate
