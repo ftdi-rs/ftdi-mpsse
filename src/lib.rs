@@ -1,5 +1,4 @@
 //! Multi-protocol synchronous serial engine utilities for FTDI devices.
-#![doc(html_root_url = "https://docs.rs/ftdi-mpsse/0.1.0")]
 #![deny(unsafe_code)]
 
 use std::convert::From;
@@ -794,10 +793,10 @@ impl MpsseCmdBuilder {
     pub fn clock_data_out(mut self, mode: ClockDataOut, data: &[u8]) -> Self {
         let mut len = data.len();
         assert!(len <= 65536, "data length cannot exceed u16::MAX + 1");
-        if len == 0 {
-            return self;
-        }
-        len -= 1;
+        len = match len.checked_sub(1) {
+            Some(l) => l,
+            None => return self,
+        };
         self.0
             .extend_from_slice(&[mode.into(), (len & 0xFF) as u8, ((len >> 8) & 0xFF) as u8]);
         self.0.extend_from_slice(data);
@@ -816,10 +815,10 @@ impl MpsseCmdBuilder {
     ///           This will panic for values greater than `u16::MAX + 1`.
     pub fn clock_data_in(mut self, mode: ClockDataIn, mut len: usize) -> Self {
         assert!(len <= 65536, "data length cannot exceed u16::MAX + 1");
-        if len == 0 {
-            return self;
-        }
-        len -= 1;
+        len = match len.checked_sub(1) {
+            Some(l) => l,
+            None => return self,
+        };
         self.0
             .extend_from_slice(&[mode.into(), (len & 0xFF) as u8, ((len >> 8) & 0xFF) as u8]);
         self
@@ -831,10 +830,10 @@ impl MpsseCmdBuilder {
     pub fn clock_data(mut self, mode: ClockData, data: &[u8]) -> Self {
         let mut len = data.len();
         assert!(len <= 65536, "data length cannot exceed u16::MAX + 1");
-        if len == 0 {
-            return self;
-        }
-        len -= 1;
+        len = match len.checked_sub(1) {
+            Some(l) => l,
+            None => return self,
+        };
         self.0
             .extend_from_slice(&[mode.into(), (len & 0xFF) as u8, ((len >> 8) & 0xFF) as u8]);
         self.0.extend_from_slice(data);
@@ -851,10 +850,10 @@ impl MpsseCmdBuilder {
     ///           This will panic for values greater than 8.
     pub fn clock_bits_out(mut self, mode: ClockBitsOut, data: u8, mut len: u8) -> Self {
         assert!(len <= 8, "data length cannot exceed 8");
-        if len == 0 {
-            return self;
-        }
-        len -= 1;
+        len = match len.checked_sub(1) {
+            Some(l) => l,
+            None => return self,
+        };
         self.0.extend_from_slice(&[mode.into(), len, data]);
         self
     }
@@ -868,10 +867,10 @@ impl MpsseCmdBuilder {
     ///           This will panic for values greater than 8.
     pub fn clock_bits_in(mut self, mode: ClockBitsIn, mut len: u8) -> Self {
         assert!(len <= 8, "data length cannot exceed 8");
-        if len == 0 {
-            return self;
-        }
-        len -= 1;
+        len = match len.checked_sub(1) {
+            Some(l) => l,
+            None => return self,
+        };
         self.0.extend_from_slice(&[mode.into(), len]);
         self
     }
@@ -885,10 +884,10 @@ impl MpsseCmdBuilder {
     ///           This will panic for values greater than 8.
     pub fn clock_bits(mut self, mode: ClockBits, data: u8, mut len: u8) -> Self {
         assert!(len <= 8, "data length cannot exceed 8");
-        if len == 0 {
-            return self;
-        }
-        len -= 1;
+        len = match len.checked_sub(1) {
+            Some(l) => l,
+            None => return self,
+        };
         self.0.extend_from_slice(&[mode.into(), len, data]);
         self
     }
@@ -910,10 +909,10 @@ impl MpsseCmdBuilder {
         mut len: u8,
     ) -> Self {
         assert!(len <= 7, "data length cannot exceed 7");
-        if len == 0 {
-            return self;
-        }
-        len -= 1;
+        len = match len.checked_sub(1) {
+            Some(l) => l,
+            None => return self,
+        };
         if tdi {
             data |= 0x80;
         }
@@ -932,10 +931,10 @@ impl MpsseCmdBuilder {
     ///           This will panic for values greater than 7.
     pub fn clock_tms(mut self, mode: ClockTMS, mut data: u8, tdi: bool, mut len: u8) -> Self {
         assert!(len <= 7, "data length cannot exceed 7");
-        if len == 0 {
-            return self;
-        }
-        len -= 1;
+        len = match len.checked_sub(1) {
+            Some(l) => l,
+            None => return self,
+        };
         if tdi {
             data |= 0x80;
         }
