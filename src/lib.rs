@@ -281,6 +281,50 @@ impl From<MpsseCmd> for u8 {
     }
 }
 
+/// Modes for clocking bits out on TMS for JTAG mode.
+///
+/// This is an argument to the [`clock_tms_out`] method.
+///
+/// [`clock_tms_out`]: MpsseCmdBuilder::clock_tms_out
+#[repr(u8)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum ClockTMSOut {
+    /// LSB first, TMS out on positive edge
+    PosEdge = 0x4A,
+    /// LSB first, TMS out on negative edge
+    NegEdge = 0x4B,
+}
+
+impl From<ClockTMSOut> for u8 {
+    fn from(value: ClockTMSOut) -> u8 {
+        value as u8
+    }
+}
+
+/// Modes for clocking bits out on TMS for JTAG mode while reading TDO.
+///
+/// This is an argument to the [`clock_tms`] method.
+///
+/// [`clock_tms`]: MpsseCmdBuilder::clock_tms
+#[repr(u8)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum ClockTMS {
+    /// LSB first, TMS out on positive edge, TDO in on positive edge.
+    PosTMSPosTDO = 0x6A,
+    /// LSB first, TMS out on positive edge, TDO in on negative edge.
+    PosTMSNegTDO = 0x6E,
+    /// LSB first, TMS out on negative edge, TDO in on positive edge.
+    NegTMSPosTDO = 0x6B,
+    /// LSB first, TMS out on negative edge, TDO in on negative edge.
+    NegTMSNegTDO = 0x6F,
+}
+
+impl From<ClockTMS> for u8 {
+    fn from(value: ClockTMS) -> u8 {
+        value as u8
+    }
+}
+
 /// Initialization settings for the MPSSE.
 ///
 /// Settings can be written to the device with the appropriate
@@ -848,6 +892,56 @@ impl MpsseCmdBuilder {
         self.0.extend_from_slice(&[mode.into(), len, data]);
         self
     }
+
+    /// Clock TMS bits out.
+    ///
+    /// # Arguments
+    ///
+    /// * `mode` - TMS clocking mode.
+    /// * `data` - TMS bits.
+    /// * `tdi` - Value to place on TDI while clocking.
+    /// * `len` - Number of bits to clock out.
+    ///           This will panic for values greater than 7.
+    pub fn clock_tms_out(
+        mut self,
+        mode: ClockTMSOut,
+        mut data: u8,
+        tdi: bool,
+        mut len: u8,
+    ) -> Self {
+        assert!(len <= 7, "data length cannot exceed 7");
+        if len == 0 {
+            return self;
+        }
+        len -= 1;
+        if tdi {
+            data |= 0x80;
+        }
+        self.0.extend_from_slice(&[mode.into(), len, data]);
+        self
+    }
+
+    /// Clock TMS bits out while clocking TDO bits in.
+    ///
+    /// # Arguments
+    ///
+    /// * `mode` - TMS clocking mode.
+    /// * `data` - TMS bits.
+    /// * `tdi` - Value to place on TDI while clocking.
+    /// * `len` - Number of bits to clock out.
+    ///           This will panic for values greater than 7.
+    pub fn clock_tms(mut self, mode: ClockTMS, mut data: u8, tdi: bool, mut len: u8) -> Self {
+        assert!(len <= 7, "data length cannot exceed 7");
+        if len == 0 {
+            return self;
+        }
+        len -= 1;
+        if tdi {
+            data |= 0x80;
+        }
+        self.0.extend_from_slice(&[mode.into(), len, data]);
+        self
+    }
 }
 
 /// Construct an MPSSE command array at compile-time.
@@ -890,6 +984,8 @@ impl MpsseCmdBuilder {
 /// * [`clock_bits_out(mode: ClockBitsOut, data: u8, len: u8)`][`MpsseCmdBuilder::clock_bits_out`]
 /// * [`clock_bits_in(mode: ClockBitsIn, len: u8) -> usize`][`MpsseCmdBuilder::clock_bits_in`]
 /// * [`clock_bits(mode: ClockBits, data: u8, len: u8) -> usize`][`MpsseCmdBuilder::clock_bits`]
+/// * [`clock_tms_out(mode: ClockTMSOut, data: u8, tdi: bool, len: u8)`][`MpsseCmdBuilder::clock_tms_out`]
+/// * [`clock_tms(mode: ClockTMS, data: u8, tdi: bool, len: u8) -> usize`][`MpsseCmdBuilder::clock_tms`]
 ///
 /// Command pseudo-statements that read data from the device may optionally have the form:
 /// ```
@@ -1153,6 +1249,18 @@ macro_rules! mpsse {
     (($passthru:tt, $read_len:tt) {const $idx_id:ident = clock_bits($mode:expr, $data:expr, $len:expr); $($tail:tt)*} -> [$($out:tt)*]) => {
         const $idx_id: usize = $read_len;
         mpsse!(($passthru, $read_len) {clock_bits($mode, $data, $len); $($tail)*} -> [$($out)*]);
+    };
+    ($passthru:tt {clock_tms_out($mode:expr, $data:expr, $tdi:expr, $len:expr); $($tail:tt)*} -> [$($out:tt)*]) => {
+        mpsse!(@assert $passthru, ($len as u8 > 0_u8 && $len as u8 <= 7_u8), "data length must be in 1..=7");
+        mpsse!($passthru {$($tail)*} -> [$($out)* $mode as $crate::ClockTMSOut as u8, (($len) - 1) as u8, ($data as u8) | if $tdi { 0x80 } else { 0 },]);
+    };
+    (($passthru:tt, $read_len:tt) {clock_tms($mode:expr, $data:expr, $tdi:expr, $len:expr); $($tail:tt)*} -> [$($out:tt)*]) => {
+        mpsse!(@assert ($passthru, $read_len), ($len as u8 > 0_u8 && $len as u8 <= 7_u8), "data length must be in 1..=7");
+        mpsse!(($passthru, ($read_len + 1)) {$($tail)*} -> [$($out)* $mode as $crate::ClockTMS as u8, (($len) - 1) as u8, ($data as u8) | if $tdi { 0x80 } else { 0 },]);
+    };
+    (($passthru:tt, $read_len:tt) {const $idx_id:ident = clock_tms($mode:expr, $data:expr, $tdi:expr, $len:expr); $($tail:tt)*} -> [$($out:tt)*]) => {
+        const $idx_id: usize = $read_len;
+        mpsse!(($passthru, $read_len) {clock_tms($mode, $data, $tdi, $len); $($tail)*} -> [$($out)*]);
     };
 
     // Emit command_data
