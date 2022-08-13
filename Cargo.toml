@@ -2,7 +2,7 @@
 name = "ftdi-mpsse"
 version = "0.1.1"
 authors = ["Alex Martens <alex@thinglab.org>", "Sergey Matyukevich <geomatsi@gmail.com>"]
-edition = "2018"
+edition = "2021"
 description = "Rust helpers for the MPSSE on FTDI chips."
 keywords = ["ftdi", "mpsse"]
 categories = ["hardware-support"]
