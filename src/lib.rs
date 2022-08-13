@@ -1,8 +1,6 @@
 //! Multi-protocol synchronous serial engine utilities for FTDI devices.
 #![deny(unsafe_code)]
 
-use std::convert::From;
-use std::result::Result;
 use std::time::Duration;
 
 /// MPSSE opcodes.
