@@ -406,6 +406,12 @@ pub trait MpsseCmdExecutor {
 /// [`xfer`]: MpsseCmdExecutor::xfer
 pub struct MpsseCmdBuilder(pub Vec<u8>);
 
+impl Default for MpsseCmdBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MpsseCmdBuilder {
     /// Create a new command builder.
     ///
