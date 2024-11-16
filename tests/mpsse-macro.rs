@@ -179,6 +179,29 @@ fn all_commands_const() {
     assert_eq!(TMS_INDEX, 12);
 }
 
+// https://github.com/ftdi-rs/ftdi-mpsse/issues/17
+#[test]
+fn data_clocking_commands() {
+    mpsse! {
+        const (DATA, DATA_READ_LEN) = {
+            enable_adaptive_data_clocking();
+            disable_adaptive_data_clocking();
+            enable_3phase_data_clocking();
+            disable_3phase_data_clocking();
+        };
+    }
+    assert_eq!(DATA_READ_LEN, 0);
+    assert_eq!(
+        DATA,
+        [
+            MpsseCmd::EnableAdaptiveClocking as u8,
+            MpsseCmd::DisableAdaptiveClocking as u8,
+            MpsseCmd::Enable3PhaseClocking as u8,
+            MpsseCmd::Disable3PhaseClocking as u8,
+        ]
+    );
+}
+
 #[test]
 #[should_panic(expected = "data length must be in 1..=(u16::MAX + 1)")]
 fn clock_data_assert_lower() {
