@@ -1,6 +1,6 @@
 [package]
 name = "ftdi-mpsse"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Alex Martens <alex@thinglab.org>", "Sergey Matyukevich <geomatsi@gmail.com>"]
 edition = "2021"
 description = "Rust helpers for the MPSSE on FTDI chips."

@@ -1171,10 +1171,10 @@ macro_rules! mpsse {
         mpsse!($passthru {$($tail)*} -> [$($out)* $crate::MpsseCmd::Disable3PhaseClocking as u8,]);
     };
     ($passthru:tt {enable_adaptive_data_clocking(); $($tail:tt)*} -> [$($out:tt)*]) => {
-        mpsse!($passthru {$($tail)*} -> [$($out)* $crate::MpsseCmd::EnableDataClocking as u8,]);
+        mpsse!($passthru {$($tail)*} -> [$($out)* $crate::MpsseCmd::EnableAdaptiveClocking as u8,]);
     };
     ($passthru:tt {disable_adaptive_data_clocking(); $($tail:tt)*} -> [$($out:tt)*]) => {
-        mpsse!($passthru {$($tail)*} -> [$($out)* $crate::MpsseCmd::DisableDataClocking as u8,]);
+        mpsse!($passthru {$($tail)*} -> [$($out)* $crate::MpsseCmd::DisableAdaptiveClocking as u8,]);
     };
     ($passthru:tt {set_gpio_lower($state:expr, $direction:expr); $($tail:tt)*} -> [$($out:tt)*]) => {
         mpsse!($passthru {$($tail)*} -> [$($out)* $crate::MpsseCmd::SetDataBitsLowbyte as u8, $state as u8, $direction as u8,]);
