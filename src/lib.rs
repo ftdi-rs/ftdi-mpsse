@@ -1057,7 +1057,7 @@ impl MpsseCmdBuilder {
 ///
 ///     // Everything else handled by libftd2xx crate implementation.
 ///     ($($tokens:tt)*) => {
-///         ::ftdi_mpsse::mpsse!($($tokens)*);
+///         ::ftdi_mpsse::mpsse!($($tokens)*)
 ///     };
 /// }
 ///
